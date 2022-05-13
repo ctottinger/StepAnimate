@@ -1,6 +1,6 @@
 {
 	"name": "stepanimate",
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"description": "Animate an object of values between a given start and stop",
 	"main": "index.js",
 	"scripts": {

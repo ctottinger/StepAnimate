@@ -141,7 +141,9 @@ class StepAnimate extends EventEmitter {
 
 	async start() {
 		await this.loaded;
+		this.emit("start", this.steps[0]);
 		this.sendStep(this.steps[0]);
+		this.emit("started", this.steps[0]);
 
 		let currentStep = 1;
 		this.timerRef = setInterval(() => {

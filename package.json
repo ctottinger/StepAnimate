@@ -4,6 +4,7 @@
 	"description": "Animate an object of values between a given start and stop",
 	"main": "index.js",
 	"scripts": {
+		"test:coverage": "nyc npm run test",
 		"test": "mocha",
 		"lint": "eslint index.js test"
 	},
@@ -26,6 +27,8 @@
 		"eslint": "^8.15.0",
 		"eslint-config-standard": "^17.0.0",
 		"eslint-config-xo": "^0.40.0",
-		"mocha": "^10.0.0"
+		"mocha": "^10.0.0",
+		"nyc": "^15.1.0",
+		"sinon": "^14.0.0"
 	}
 }

@@ -1,24 +1,27 @@
 {
-  "name": "stepanimate",
-  "version": "1.0.0",
-  "description": "Animate an object of values between a given start and stop",
-  "main": "index.js",
-  "scripts": {
-    "test": "mocha"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ctottinger/StepAnimate.git"
-  },
-  "keywords": [
-    "animation",
-    "animate",
-    "stepper"
-  ],
-  "author": "Christian Ottinger",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ctottinger/StepAnimate/issues"
-  },
-  "homepage": "https://github.com/ctottinger/StepAnimate#readme"
+	"name": "stepanimate",
+	"version": "1.0.0",
+	"description": "Animate an object of values between a given start and stop",
+	"main": "index.js",
+	"scripts": {
+		"test": "mocha"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ctottinger/StepAnimate.git"
+	},
+	"keywords": [
+		"animation",
+		"animate",
+		"stepper"
+	],
+	"author": "Christian Ottinger",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/ctottinger/StepAnimate/issues"
+	},
+	"homepage": "https://github.com/ctottinger/StepAnimate#readme",
+	"devDependencies": {
+		"mocha": "^10.0.0"
+	}
 }

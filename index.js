@@ -79,75 +79,59 @@ class StepAnimate extends EventEmitter {
       this.dividedDeltas[0] = d / this.numberOfSteps;
     }
 
-    const computeSteps = () => {
-      const computedSteps = [];
-      const naturalSteps = [];
+    const computedSteps = [];
+    const naturalSteps = [];
 
-      const hardCeil = (base, modify, ceil, goingUp) => {
-        if (base === ceil) {
-          return ceil;
-        }
-
-        const op = base + modify;
-        if (goingUp && op >= ceil) {
-          return ceil;
-        }
-
-        if (!goingUp && op <= ceil) {
-          return ceil;
-        }
-
-        const rounded = this.round(op, goingUp);
-        return rounded;
-      };
-
-      if (this.pointType === 'object') {
-        let values = Object.entries(this.startPoint);
-
-        for (let step = 0; step < this.numberOfSteps; step++) {
-          const stepValue = {};
-
-          values = values.map((val, index) => {
-            let goingUp = true;
-            if (this.dividedDeltas[index] < 0) {
-              goingUp = false;
-            }
-
-            const re = hardCeil(val[1], this.dividedDeltas[index], this.endPoint[val[0]], goingUp);
-            stepValue[val[0]] = re;
-            return [val[0], re];
-          });
-          computedSteps.push(step);
-        }
-      } else {
-        let values = this.startPoint;
-
-        let goingUp = true;
-        if (this.dividedDeltas[0] < 0) {
-          goingUp = false;
-        }
-
-        for (let step = 0; step < this.numberOfSteps; step++) {
-          const op = hardCeil(values.val, this.dividedDeltas[0], this.endPoint.val, goingUp);
-          values = {
-            val: op
-          };
-          naturalSteps.push(op);
-          computedSteps.push(values);
-        }
+    const hardCeil = (base, modify, ceil, goingUp) => {
+      if (base === ceil) {
+        return ceil;
       }
 
-      this.steps = computedSteps;
-      const sentData = this.pointType === 'number' ? naturalSteps : computedSteps;
-      this.emit('computed', sentData);
+      const op = base + modify;
+      if (goingUp && op >= ceil) {
+        return ceil;
+      }
+
+      if (!goingUp && op <= ceil) {
+        return ceil;
+      }
+
+      const rounded = this.round(op, goingUp);
+      return rounded;
     };
 
-    this.loaded = new Promise(resolve => {
-      computeSteps();
-      resolve();
-    });
+    if (this.pointType === 'object') {
+      let values = Object.entries(this.startPoint);
 
-    // Return this;
+      for (let step = 0; step < this.numberOfSteps; step++) {
+        const stepValue = {};
+
+        values = values.map((val, index) => {
+          const goingUp = !(this.dividedDeltas[index] < 0);
+
+          const re = hardCeil(val[1], this.dividedDeltas[index], this.endPoint[val[0]], goingUp);
+          stepValue[val[0]] = re;
+          return [val[0], re];
+        });
+        computedSteps.push(step);
+      }
+    } else {
+      let values = this.startPoint;
+      const goingUp = !(this.dividedDeltas[index] < 0);
+
+      for (let step = 0; step < this.numberOfSteps; step++) {
+        const op = hardCeil(values.val, this.dividedDeltas[0], this.endPoint.val, goingUp);
+        values = {
+          val: op
+        };
+        naturalSteps.push(op);
+        computedSteps.push(values);
+      }
+    }
+
+    this.steps = computedSteps;
+    const sentData = this.pointType === 'number' ? naturalSteps : computedSteps;
+    // this.emit('computed', sentData);
   }
 
   validateObjectPoints () {
@@ -171,7 +155,6 @@ class StepAnimate extends EventEmitter {
 
   sendStep (step) {
     const val = (this.pointType === 'number') ? step.val : step;
-
     this.emit('step', val);
   }
 

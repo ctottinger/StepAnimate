@@ -52,6 +52,33 @@ describe('StepAnimate Tests', function () {
   })
 
   describe('Integer Tests', function () {
+    it('should take the appropriate time to run a transition',(done)=>{
+      this.timeout(5500);
+      const start=new Date().getTime()
+      let previous = 1
+      let stepCounter = 0
+      const opts = {
+        start: previous,
+        end: 100,
+        duration: 5000,
+        stepTime: 50
+      }
+      const animation = new StepAnimate(opts)
+      animation.on('step', (s) => {
+        assert.equal(s >= previous, true, 'actual '+s+",previous "+previous+" step counter "+stepCounter)
+        previous = s
+        stepCounter++
+      })
+      animation.on('ended', (e) => {
+        assert.equal(stepCounter, 100)
+        const end=new Date().getTime();
+        const diff=Math.abs((end-5000)-start)
+        // console.log('start '+start+' end '+end+" difference: "+diff)
+        assert.equal(diff<100, true)
+        done()
+      })
+      animation.start()
+    })
     it('should never provide a value outside of bounds')
     it('should correctly animate upwards', (done) => {
       this.timeout(700)

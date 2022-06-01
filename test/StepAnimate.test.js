@@ -19,12 +19,12 @@ describe('StepAnimate Tests', function () {
     it('should fail when duration is not an int', () => {
       assert.throws(() => {
         new StepAnimate({ start: 0, end: 1, duration: 'a', stepTime: 25 })
-      }, /^Error: Duration is not a number/)
+      }, /^Error: Provided duration is not a number/)
     })
     it('should fail when duration is not provided', () => {
       assert.throws(() => {
         new StepAnimate({ start: 0, end: 1, stepTime: 25 })
-      }, /^Error: Duration is not a number/)
+      }, /^Error: Provided duration is not a number/)
     })
     it('should fail when start is not provided', () => {
       assert.throws(() => {
@@ -54,7 +54,6 @@ describe('StepAnimate Tests', function () {
   describe('Integer Tests', function () {
     it('should take the appropriate time to run a transition',(done)=>{
       this.timeout(5500);
-      const start=new Date().getTime()
       let previous = 1
       let stepCounter = 0
       const opts = {
@@ -70,13 +69,14 @@ describe('StepAnimate Tests', function () {
         stepCounter++
       })
       animation.on('ended', (e) => {
-        assert.equal(stepCounter, 100)
         const end=new Date().getTime();
+        assert.equal(stepCounter, 100)
         const diff=Math.abs((end-5000)-start)
-        // console.log('start '+start+' end '+end+" difference: "+diff)
+        console.log('StepAnimate.test.js:77 -> diff ->', e.steps); 
         assert.equal(diff<100, true)
         done()
       })
+      const start=new Date().getTime()
       animation.start()
     })
     it('should never provide a value outside of bounds')

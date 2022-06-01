@@ -40,11 +40,11 @@ class StepAnimate extends EventEmitter {
     }
 
     if (typeof config.duration !== 'number') {
-      throw new Error('Duration is not a number');
+      throw new Error('Provided duration is not a number');
     }
 
     if ('stepTime' in config && 'numberOfSteps' in config) {
-      throw new Error('Can\'t set step time AND number of');
+      throw new Error('Can\'t set step time AND number of, must provide either one or the other.');
     }
 
     if (Number.isNaN(this.stepTime)) {
@@ -53,13 +53,13 @@ class StepAnimate extends EventEmitter {
 
     if (typeof config.start === 'object') {
       if (typeof config.end !== 'object') {
-        throw new Error('Start & end type don\'t match');
+        throw new Error('Start & end type don\'t match, both must either be ints or objects of keys:ints');
       }
 
       this.pointType = 'object';
     } else if (typeof config.start === 'number') {
       if (typeof config.end !== 'number') {
-        throw new Error('Start & end type don\'t match');
+        throw new Error('Start & end type don\'t match, both must either be ints or objects of keys:ints');
       }
 
       this.pointType = 'number';
@@ -117,7 +117,7 @@ class StepAnimate extends EventEmitter {
       }
     } else {
       let values = this.startPoint;
-      const goingUp = !(this.dividedDeltas[index] < 0);
+      const goingUp = !(this.dividedDeltas[0] < 0);
 
       for (let step = 0; step < this.numberOfSteps; step++) {
         const op = hardCeil(values.val, this.dividedDeltas[0], this.endPoint.val, goingUp);
@@ -130,8 +130,6 @@ class StepAnimate extends EventEmitter {
     }
 
     this.steps = computedSteps;
-    const sentData = this.pointType === 'number' ? naturalSteps : computedSteps;
-    // this.emit('computed', sentData);
   }
 
   validateObjectPoints () {
@@ -171,17 +169,24 @@ class StepAnimate extends EventEmitter {
     this.emit('started', this.steps[0]);
 
     let currentStep = 1;
-    this.timerRef = setInterval(() => {
-      if (currentStep < this.numberOfSteps) {
-        this.sendStep(this.steps[currentStep]);
+    const start = new Date().getTime();
+    const stepTimes = [];
 
+    const timeRun = () => {
+      if (currentStep < this.numberOfSteps) {
+        this.timerRef = setTimeout(timeRun, this.stepTime);
+        this.sendStep(this.steps[currentStep]);
         currentStep++;
+        stepTimes.push(new Date().getTime() - start)
       } else {
-        clearInterval(this.timerRef);
+        clearTimeout(this.timerRef);
         this.timerRef = null;
-        this.emit('ended', this.endPoint);
+        let end = new Date().getTime();
+        this.emit('ended', {end:this.endPoint, time:end-start, steps:stepTimes});
       }
-    }, this.stepTime);
+    }
+
+    this.timerRef = setTimeout(timeRun, this.stepTime);
   }
 }
 

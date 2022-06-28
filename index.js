@@ -10,8 +10,8 @@ class StepAnimate extends EventEmitter {
     this.roundConfig = true;
     this.stepTime = 0;
     this.numberOfSteps = 0;
+    this.stretch = false;
     if (config.start === undefined) {
-      // they didn't provide a start. Fail.
       throw new Error('start not provided');
     }
     if (config.end === undefined) {
@@ -19,6 +19,10 @@ class StepAnimate extends EventEmitter {
     }
     [this.startPoint, this.endPoint, this.startKeys] = [config.start, config.end, Object.keys(config.start)];
     this.duration = config.duration;
+
+    if ('stretch' in config && config.stretch === true) {
+      this.stretch = true;
+    }
 
     this.round = (value, up) => {
       if (this.roundConfig) {
@@ -76,7 +80,15 @@ class StepAnimate extends EventEmitter {
     } else {
       [this.startPoint, this.endPoint] = [{ val: config.start }, { val: config.end }];
       const d = (this.startPoint.val - this.endPoint.val) * -1;
-      this.dividedDeltas[0] = d / this.numberOfSteps;
+
+      console.log('index.js:84 -> delta ->', d);
+
+      if (this.stretch === true && d < this.numberOfSteps) {
+        this.dividedDeltas[0] = d / this.numberOfSteps;
+        console.log('index.js:88 -> number ->', this.numberOfSteps);
+      } else {
+        this.dividedDeltas[0] = d / this.numberOfSteps;
+      }
     }
 
     const computedSteps = [];
@@ -113,7 +125,7 @@ class StepAnimate extends EventEmitter {
           stepValue[val[0]] = re;
           return [val[0], re];
         });
-        computedSteps.push(step);
+        computedSteps.push(stepValue);
       }
     } else {
       let values = this.startPoint;
@@ -170,21 +182,21 @@ class StepAnimate extends EventEmitter {
 
     let currentStep = 1;
     const start = new Date().getTime();
-    const stepTimes = [];
+    // const stepTimes = [];
 
     const timeRun = () => {
       if (currentStep < this.numberOfSteps) {
         this.timerRef = setTimeout(timeRun, this.stepTime);
         this.sendStep(this.steps[currentStep]);
         currentStep++;
-        stepTimes.push(new Date().getTime() - start)
+        // stepTimes.push(new Date().getTime() - start);
       } else {
         clearTimeout(this.timerRef);
         this.timerRef = null;
-        let end = new Date().getTime();
-        this.emit('ended', {end:this.endPoint, time:end-start, steps:stepTimes});
+        // const end = new Date().getTime();
+        this.emit('ended', { end: this.endPoint, time: end - start, steps: stepTimes });
       }
-    }
+    };
 
     this.timerRef = setTimeout(timeRun, this.stepTime);
   }

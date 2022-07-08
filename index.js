@@ -20,20 +20,10 @@ class StepAnimate extends EventEmitter {
     [this.startPoint, this.endPoint, this.startKeys] = [config.start, config.end, Object.keys(config.start)];
     this.duration = config.duration;
 
-    if ('stretch' in config && config.stretch === true) {
-      this.stretch = true;
-    }
+    if ('stretch' in config && config.stretch === true) this.stretch = true;
 
     this.round = (value, up) => {
-      if (this.roundConfig) {
-        // if (up) {
-        //   return Math.ceil(value);
-        // }
-        // return Math.floor(value);
-        return Math.round(value);
-      }
-
-      return value;
+      return (this.roundConfig) ? Math.round(value) : value;
     };
 
     this.stepTime = parseInt(config.stepTime, 10);

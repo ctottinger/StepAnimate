@@ -26,11 +26,11 @@ class StepAnimate extends EventEmitter {
 
     this.round = (value, up) => {
       if (this.roundConfig) {
-        if (up) {
-          return Math.ceil(value);
-        }
-
-        return Math.floor(value);
+        // if (up) {
+        //   return Math.ceil(value);
+        // }
+        // return Math.floor(value);
+        return Math.round(value);
       }
 
       return value;
@@ -81,32 +81,22 @@ class StepAnimate extends EventEmitter {
       [this.startPoint, this.endPoint] = [{ val: config.start }, { val: config.end }];
       const d = (this.startPoint.val - this.endPoint.val) * -1;
 
-      console.log('index.js:84 -> delta ->', d);
-
       if (this.stretch === true && d < this.numberOfSteps) {
         this.dividedDeltas[0] = d / this.numberOfSteps;
-        console.log('index.js:88 -> number ->', this.numberOfSteps);
       } else {
         this.dividedDeltas[0] = d / this.numberOfSteps;
       }
     }
 
     const computedSteps = [];
-    const naturalSteps = [];
 
     const hardCeil = (base, modify, ceil, goingUp) => {
-      if (base === ceil) {
-        return ceil;
-      }
+      if (base === ceil) return ceil;
 
       const op = base + modify;
-      if (goingUp && op >= ceil) {
-        return ceil;
-      }
+      if (goingUp && op >= ceil) return ceil;
 
-      if (!goingUp && op <= ceil) {
-        return ceil;
-      }
+      if (!goingUp && op <= ceil) return ceil;
 
       const rounded = this.round(op, goingUp);
       return rounded;
@@ -119,25 +109,31 @@ class StepAnimate extends EventEmitter {
         const stepValue = {};
 
         values = values.map((val, index) => {
-          const goingUp = !(this.dividedDeltas[index] < 0);
+          const delta = this.dividedDeltas[index];
+          const goingUp = !(delta < 0);
 
-          const re = hardCeil(val[1], this.dividedDeltas[index], this.endPoint[val[0]], goingUp);
+          const re = hardCeil(val[1], delta, this.endPoint[val[0]], goingUp);
+          const modify = (this.stretch) ? val[1] + delta : re;
+
           stepValue[val[0]] = re;
-          return [val[0], re];
+          return [val[0], modify];
         });
+
         computedSteps.push(stepValue);
       }
     } else {
-      let values = this.startPoint;
       const goingUp = !(this.dividedDeltas[0] < 0);
+      let current = this.startPoint.val;
+      let lastVal = this.startPoint.val;
 
       for (let step = 0; step < this.numberOfSteps; step++) {
-        const op = hardCeil(values.val, this.dividedDeltas[0], this.endPoint.val, goingUp);
-        values = {
-          val: op
-        };
-        naturalSteps.push(op);
-        computedSteps.push(values);
+        const modify = (this.stretch) ? current : lastVal;
+
+        const out = hardCeil(modify, this.dividedDeltas[0], this.endPoint.val, goingUp);
+        current = current + this.dividedDeltas[0];
+
+        lastVal = out;
+        computedSteps.push({ val: out });
       }
     }
 
@@ -181,20 +177,16 @@ class StepAnimate extends EventEmitter {
     this.emit('started', this.steps[0]);
 
     let currentStep = 1;
-    const start = new Date().getTime();
-    // const stepTimes = [];
 
     const timeRun = () => {
       if (currentStep < this.numberOfSteps) {
         this.timerRef = setTimeout(timeRun, this.stepTime);
         this.sendStep(this.steps[currentStep]);
         currentStep++;
-        // stepTimes.push(new Date().getTime() - start);
       } else {
         clearTimeout(this.timerRef);
         this.timerRef = null;
-        // const end = new Date().getTime();
-        this.emit('ended', { end: this.endPoint, time: end - start, steps: stepTimes });
+        this.emit('ended', { end: this.endPoint });
       }
     };
 
